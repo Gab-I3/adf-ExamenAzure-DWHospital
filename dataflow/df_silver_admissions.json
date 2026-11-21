@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "silver_admissions_sql",
+						"referenceName": "bronze_admissions_sql",
 						"type": "DatasetReference"
 					},
 					"name": "source1"
@@ -20,12 +20,12 @@
 			],
 			"scriptLines": [
 				"source(output(",
-				"          admission_id as integer,",
-				"          patient_id as integer,",
-				"          admission_date as date,",
-				"          discharge_date as date,",
+				"          admission_id as string,",
+				"          patient_id as string,",
+				"          admission_date as string,",
+				"          discharge_date as string,",
 				"          department as string,",
-				"          attending_doctor_id as integer",
+				"          attending_doctor_id as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",

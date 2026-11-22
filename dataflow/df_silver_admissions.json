@@ -12,10 +12,21 @@
 					"name": "source1"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_admissions_sql",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -31,7 +42,38 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
-				"source1 derive() ~> derivedColumn1"
+				"source1 derive(department = case(rlike(lower(department), '.*onco.*'), 'Oncology', rlike(lower(department), '.*cardio.*'), 'Cardiology', trim(department)),",
+				"          admission_id = toInteger(patient_id),",
+				"          patient_id = toInteger(patient_id),",
+				"          attending_doctor_id = toInteger(attending_doctor_id)) ~> derivedColumn1",
+				"derivedColumn1 derive(admission_date = coalesce(toDate(admission_date, 'MM-dd-yy'), toDate(admission_date, 'dd-MMM-yyyy'), toDate(admission_date, 'yyyy-MM-dd')),",
+				"          discharge_date = coalesce(toDate(discharge_date, 'yyyy-MM-dd'), toDate(discharge_date, 'dd-MMM-yyyy'), toDate(discharge_date, 'MM-dd-yy'))) ~> derivedColumn2",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          admission_id as integer,",
+				"          patient_id as integer,",
+				"          admission_date as date,",
+				"          discharge_date as date,",
+				"          department as string,",
+				"          attending_doctor_id as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          admission_id,",
+				"          patient_id,",
+				"          admission_date,",
+				"          discharge_date,",
+				"          department,",
+				"          attending_doctor_id",
+				"     )) ~> sink1"
 			]
 		}
 	}

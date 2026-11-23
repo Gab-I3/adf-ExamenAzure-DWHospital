@@ -1,5 +1,5 @@
 {
-	"name": "df_golf_dim_servicio_cargo",
+	"name": "df_gold_dim_servicio_cargo",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {

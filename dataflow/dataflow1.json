@@ -27,17 +27,19 @@
 				}
 			],
 			"sinks": [],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "union1"
+				},
+				{
+					"name": "union2"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
 			"scriptLines": [
-				"source(output(",
-				"          billing_id as integer,",
-				"          admission_id as integer,",
-				"          charge_type as string,",
-				"          amount as decimal(12,2),",
-				"          payment_status as string,",
-				"          payment_date as date",
-				"     ),",
-				"     allowSchemaDrift: true,",
+				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'select DISTINCT payment_date as fecha from silver.billing',",
@@ -62,7 +64,10 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     query: 'select DISTINCT discharge_date as fecha from silver.admissions',",
-				"     format: 'query') ~> source3"
+				"     format: 'query') ~> source3",
+				"source1, source2 union(byName: true)~> union1",
+				"union1, source3 union(byName: true)~> union2",
+				"union2 derive(anhio = toShort(year(fecha))) ~> derivedColumn1"
 			]
 		}
 	}

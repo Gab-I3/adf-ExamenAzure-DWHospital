@@ -42,7 +42,7 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
-				"source1 derive(amount = toDecimal(regex_replace(amount, '[\\\\$,]', ''), 10, 2),",
+				"source1 derive(amount = coalesce(toFloat(amount), 0.0),",
 				"          payment_status = iif(isNull(payment_status), 'unknown', lower(trim(payment_status))),",
 				"          billing_id = toInteger(billing_id),",
 				"          admission_id = toInteger(admission_id)) ~> derivedColumn1",

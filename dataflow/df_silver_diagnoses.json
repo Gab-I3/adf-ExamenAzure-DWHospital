@@ -10,6 +10,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "silver_admissions_sql",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
 				}
 			],
 			"sinks": [
@@ -27,6 +34,9 @@
 				},
 				{
 					"name": "derivedColumn2"
+				},
+				{
+					"name": "exists1"
 				}
 			],
 			"scriptLines": [
@@ -41,6 +51,18 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
+				"source(output(",
+				"          admission_id as integer,",
+				"          patient_id as integer,",
+				"          admission_date as date,",
+				"          discharge_date as date,",
+				"          department as string,",
+				"          attending_doctor_id as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source2",
 				"derivedColumn2 derive(icd_code = toString(\r",
 				"    map(\r",
 				"        split(replace(regex_replace(trim(upper(icd_code)), '\\\\s*,\\\\s*', ','), '-', '.'), ','),\r",
@@ -54,7 +76,10 @@
 				"          diagnosis_description = trim(diagnosis_description)) ~> derivedColumn1",
 				"source1 derive(diagnosis_id = toInteger(diagnosis_id),",
 				"          admission_id = toInteger(admission_id)) ~> derivedColumn2",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"derivedColumn1, source2 exists(derivedColumn2@admission_id == source2@admission_id,",
+				"     negate:false,",
+				"     broadcast: 'auto')~> exists1",
+				"exists1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          diagnosis_id as integer,",

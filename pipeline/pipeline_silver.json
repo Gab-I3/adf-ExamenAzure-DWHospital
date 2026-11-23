@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_silver_admissions",
+						"referenceName": "df_silver_patients",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -47,7 +47,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_silver_billing",
+						"referenceName": "df_silver_admissions",
 						"type": "DataFlowReference"
 					},
 					"compute": {
@@ -93,7 +93,7 @@
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "Data flow3",
+						"activity": "Data flow2",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -109,7 +109,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_silver_patients",
+						"referenceName": "df_silver_billing",
 						"type": "DataFlowReference"
 					},
 					"compute": {

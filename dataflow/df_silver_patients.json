@@ -27,6 +27,9 @@
 				},
 				{
 					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
 				}
 			],
 			"scriptLines": [
@@ -50,7 +53,19 @@
 				"          full_name = trim(full_name),",
 				"          patient_id = toInteger(patient_id)) ~> derivedColumn1",
 				"derivedColumn1 derive(date_of_birth = toDate(date_of_birth, 'MMMM dd, yyyy')) ~> derivedColumn2",
-				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"derivedColumn2 derive(insurance_provider = iif(isNull(insurance_provider), 'Unknown',\r",
+				"    case(\r",
+				"        rlike(lower(insurance_provider), '.*blue.*'), 'BlueCross',\r",
+				"        rlike(lower(insurance_provider), '.*aetna.*'), 'Aetna',\r",
+				"        rlike(lower(insurance_provider), '.*cigna.*'), 'Cigna',\r",
+				"        rlike(lower(insurance_provider), '.*united.*|^uhc$'), 'UnitedHealth',\r",
+				"        rlike(lower(insurance_provider), '.*medicaid.*'), 'Medicaid',\r",
+				"        rlike(lower(insurance_provider), '.*medicare.*|.*medi-care.*'), 'Medicare',\r",
+				"        rlike(lower(insurance_provider), '.*self.*'), 'Self-Pay',\r",
+				"        initCap(trim(insurance_provider))\r",
+				"    )\r",
+				")) ~> derivedColumn3",
+				"derivedColumn3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          patient_id as integer,",

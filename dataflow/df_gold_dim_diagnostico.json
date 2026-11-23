@@ -1,0 +1,77 @@
+{
+	"name": "df_gold_dim_diagnostico",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "silver_diagnoses_sql",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "gold_dim_diagnostico_sql",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          diagnosis_id as integer,",
+				"          admission_id as integer,",
+				"          icd_code as string,",
+				"          diagnosis_description as string,",
+				"          severity as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source1 aggregate(groupBy(icd_code),",
+				"     diagnosis_description = first(diagnosis_description),",
+				"          severity = first(severity)) ~> aggregate1",
+				"aggregate1 derive(severity = case(\r",
+				"    upper(severity) == 'MILD' || upper(severity) == 'LOW', 'Leve',\r",
+				"    upper(severity) == 'MODERATE' || upper(severity) == 'MEDIUM', 'Moderado',\r",
+				"    upper(severity) == 'SEVERE' || upper(severity) == 'HIGH' || upper(severity) == 'CRITICAL', 'Grave',\r",
+				"    severity\r",
+				")) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          diagnostico_key as integer,",
+				"          codigo_icd as string,",
+				"          descripcion_patologia as string,",
+				"          nivel_severidad as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          codigo_icd = icd_code,",
+				"          descripcion_patologia = diagnosis_description,",
+				"          nivel_severidad = severity",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

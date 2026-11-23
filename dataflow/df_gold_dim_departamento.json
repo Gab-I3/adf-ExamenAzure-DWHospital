@@ -24,6 +24,9 @@
 			"transformations": [
 				{
 					"name": "aggregate1"
+				},
+				{
+					"name": "derivedColumn1"
 				}
 			],
 			"scriptLines": [
@@ -41,7 +44,21 @@
 				"     format: 'table') ~> source1",
 				"source1 aggregate(groupBy(department),",
 				"     conteo = count(1)) ~> aggregate1",
-				"aggregate1 sink(allowSchemaDrift: true,",
+				"aggregate1 derive(department = case(\r",
+				"    upper(department) == 'CARDIOLOGY', 'Cardiología',\r",
+				"    upper(department) == 'NEUROLOGY', 'Neurología',\r",
+				"    upper(department) == 'ONCOLOGY', 'Oncología',\r",
+				"    upper(department) == 'PEDIATRICS', 'Pediatría',\r",
+				"    upper(department) == 'EMERGENCY', 'Emergencias',\r",
+				"    upper(department) == 'SURGERY', 'Cirugía',\r",
+				"    upper(department) == 'ORTHOPEDICS', 'Ortopedia',\r",
+				"    upper(department) == 'GYNECOLOGY', 'Ginecología',\r",
+				"    upper(department) == 'INTENSIVE CARE' || upper(department) == 'ICU', 'Cuidados Intensivos',\r",
+				"    upper(department) == 'GENERAL SURGERY', 'Cirugia General',\r",
+				"    upper(department) == 'RADIOLOGY', 'Radiología',\r",
+				"    department\r",
+				")) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          departamento_key as integer,",

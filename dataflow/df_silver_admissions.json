@@ -86,7 +86,7 @@
 				"          attending_doctor_id as integer",
 				"     ),",
 				"     deletable:false,",
-				"     insertable:true,",
+				"     insertable:false,",
 				"     updateable:false,",
 				"     upsertable:true,",
 				"     keys:['admission_id'],",

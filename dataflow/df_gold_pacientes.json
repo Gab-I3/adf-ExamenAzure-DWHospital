@@ -1,0 +1,30 @@
+{
+	"name": "df_gold_pacientes",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "silver_patients_sql",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          patient_id_bk as integer,",
+				"          nombre_completo as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select\\n    DISTINCT patient_id as patient_id_bk,\\n    full_name as nombre_completo\\nfrom silver.patients',",
+				"     format: 'query') ~> source1"
+			]
+		}
+	}
+}

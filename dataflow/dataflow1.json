@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "silver_admissions_sql",
+						"referenceName": "silver_billing_sql",
 						"type": "DatasetReference"
 					},
 					"name": "source1"
@@ -19,12 +19,37 @@
 					"name": "source2"
 				},
 				{
+					"dataset": {
+						"referenceName": "silver_admissions_sql",
+						"type": "DatasetReference"
+					},
 					"name": "source3"
 				}
 			],
 			"sinks": [],
 			"transformations": [],
 			"scriptLines": [
+				"source(output(",
+				"          billing_id as integer,",
+				"          admission_id as integer,",
+				"          charge_type as string,",
+				"          amount as decimal(12,2),",
+				"          payment_status as string,",
+				"          payment_date as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select DISTINCT payment_date as fecha from silver.billing',",
+				"     format: 'query') ~> source1",
+				"source(output(",
+				"          discharge_date as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select DISTINCT admission_date as fecha from silver.admissions',",
+				"     format: 'query') ~> source2",
 				"source(output(",
 				"          admission_id as integer,",
 				"          patient_id as integer,",
@@ -36,18 +61,8 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'select DISTINCT admission_date from silver.admissions',",
-				"     format: 'query') ~> source1",
-				"source(output(",
-				"          discharge_date as date",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'select DISTINCT discharge_date from silver.admissions',",
-				"     format: 'query') ~> source2",
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source3"
+				"     query: 'select DISTINCT discharge_date as fecha from silver.admissions',",
+				"     format: 'query') ~> source3"
 			]
 		}
 	}
